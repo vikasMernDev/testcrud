@@ -1,50 +1,58 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { TextInput, Button, Group, Box, Notification } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zodResolver } from 'mantine-form-zod-resolver';
 import { z } from 'zod';
+import { Comment } from './Home';
 
-function Add({setList}) {
-  const [isSuccess, setSuccess] = useState();
+interface AddProps {
+  setList:  React.Dispatch<React.SetStateAction<Comment[]>>;
+}
+
+
+function Add({ setList }: AddProps) {
+  const [isSuccess, setSuccess] = useState<boolean | undefined>();
 
   const schema = z.object({
-    name: z
-      .string()
-      .min(5, { message: 'First Name should have at least 5 letters' }),
+    name: z.string().min(5, { message: 'Name should have at least 5 letters' }),
     email: z.string().email({ message: 'Invalid email' }),
   });
+
   const form = useForm({
     initialValues: {
       name: '',
       email: '',
     },
-
-     validate: zodResolver(schema),
+    validate: zodResolver(schema),
   });
 
-  const handleFormSubmit = (values) => {
+  const handleFormSubmit = (values: { name: string; email: string }) => {
     setList((prevList) => [
       ...prevList,
       {
+        id: prevList.length + 1, 
         name: values.name,
         email: values.email,
-      },
+      } as Comment,
     ]);
-
-    form.reset()
-    if(values.email){
+  
+    form.reset();
+    if (values.email) {
       setSuccess(true);
     }
   };
+  
+
   useEffect(() => {
     if (isSuccess) {
       const timeoutId = setTimeout(() => {
         setSuccess(false);
-      }, 2000); 
+      }, 2000);
 
       return () => clearTimeout(timeoutId);
     }
   }, [isSuccess]);
+
   return (
     <Box maw={340} mx="auto">
       <form onSubmit={form.onSubmit((values) => handleFormSubmit(values))}>
@@ -70,8 +78,6 @@ function Add({setList}) {
           title="Success"
           color="teal"
           onClose={() => setSuccess(false)}
-          shadow="sm"
-          position="bottom"
         >
           Added successfully!
         </Notification>
@@ -80,4 +86,4 @@ function Add({setList}) {
   );
 }
 
-export default Add
+export default Add;

@@ -5,10 +5,17 @@ import { zodResolver } from 'mantine-form-zod-resolver';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 
+interface RegisterFormValues {
+  firstname: string;
+  lastname: string;
+  email: string;
+  mobile: string;
+}
+
 function Register() {
   const navigate = useNavigate()
-  const [isSuccess, setSuccess] = useState(false);
-  const isConsecutive = (value) => {
+  const [isSuccess, setSuccess] = useState<Boolean>(false);
+  const isConsecutive = (value:string) => {
     for (let i = 0; i < value.length - 1; i++) {
       if (Number(value[i]) + 1 === Number(value[i + 1])) {
         return true;
@@ -33,7 +40,7 @@ function Register() {
       }),
   });
 
-  const form = useForm({
+  const form = useForm<RegisterFormValues>({
     initialValues: {
       firstname: '',
       lastname: '',
@@ -41,10 +48,10 @@ function Register() {
       mobile: '',
     },
 
-     validate: zodResolver(schema),
+     validate: zodResolver(schema) as any,
   });
 
-  const handleFormSubmit = (values) => {
+  const handleFormSubmit = (values:RegisterFormValues) => {
     console.log(values);
     setSuccess(true);
     form.reset()
@@ -91,8 +98,6 @@ function Register() {
           title="Success"
           color="teal"
           onClose={() => setSuccess(false)}
-          shadow="sm"
-          position="bottom"
         >
           Form submitted successfully!
         </Notification>

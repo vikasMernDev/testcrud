@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import { TextInput, Checkbox, Button, Group, Box, Notification } from '@mantine/core';
+import React, { useEffect, useState } from 'react';
+import {
+  TextInput,
+  Checkbox,
+  Button,
+  Group,
+  Box,
+  Notification,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zodResolver } from 'mantine-form-zod-resolver';
 import { z } from 'zod';
@@ -7,11 +14,16 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 
-function Update() {
-  const navigate = useNavigate()
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [isSuccess, setSuccess] = useState();
+interface UpdateProps {}
+
+interface FormData {
+  name: string;
+  email: string;
+}
+
+const Update: React.FC<UpdateProps> = () => {
+  const navigate = useNavigate();
+  const [isSuccess, setSuccess] = useState<boolean | undefined>();
 
   const schema = z.object({
     name: z
@@ -19,41 +31,39 @@ function Update() {
       .min(6, { message: 'First Name should have at least 6 letters' }),
     email: z.string().email({ message: 'Invalid email' }),
   });
-  const form = useForm({
+
+  const form = useForm<FormData>({
     initialValues: {
       name: '',
       email: '',
     },
-
-     validate: zodResolver(schema),
+    validate: zodResolver(schema) as any,
   });
-  const {id} = useParams()
-  const { isPending, error, data, isFetching } = useQuery({
-    
-    queryKey: ['repoData',id],
-    queryFn: async() =>
-     await axios
+
+  const { id } = useParams();
+  const { isLoading, error, data } = useQuery({
+    queryKey: ['repoData', id],
+    queryFn: async () =>
+      await axios
         .get(`https://jsonplaceholder.typicode.com/comments/${id}`)
         .then((res) => res.data),
-  })
-  // console.log(id,'Fetched data:', data);
+  });
 
   useEffect(() => {
-    if (!isPending && !error && data) {
+    if (!isLoading && !error && data) {
       form.setValues({
         name: data?.name || '',
         email: data?.email || '',
       });
     }
-  }, [isPending, error, data, id]);
+  }, [isLoading, error, data, id]);
 
-  if (isPending) return 'Loading...'
+  if (isLoading) return <div>Loading...</div>;
 
-  if (error) return 'An error has occurred: ' + error.message
 
-  const handleFormSubmit = (values) => {
-    form.reset()
-    if(values.email){
+  const handleFormSubmit = (values: FormData) => {
+    form.reset();
+    if (values.email) {
       setSuccess(true);
     }
   };
@@ -83,14 +93,12 @@ function Update() {
           title="Success"
           color="teal"
           onClose={() => setSuccess(false)}
-          shadow="sm"
-          position="bottom"
         >
           Updated successfully!
         </Notification>
       )}
     </Box>
   );
-}
+};
 
-export default Update
+export default Update;

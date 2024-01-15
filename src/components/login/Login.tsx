@@ -5,9 +5,14 @@ import { zodResolver } from 'mantine-form-zod-resolver';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 
+interface LoginFormValues {
+  email: string;
+  password: string;
+}
+
 function Login() {
   const navigate = useNavigate()
-  const [isSuccess, setSuccess] = useState(false);
+  const [isSuccess, setSuccess] = useState<Boolean>(false);
 
   const schema = z.object({
     email: z.string().email({ message: 'Invalid email' }),
@@ -16,16 +21,15 @@ function Login() {
     .min(6, { message: 'Password should have at least 6 letters' }),
   });
 
-  const form = useForm({
+  const form = useForm<LoginFormValues>({
     initialValues: {
       email: '',
       password: '',
     },
-
-     validate: zodResolver(schema),
+    validate: zodResolver(schema) as any,
   });
 
-  const handleFormSubmit = (values) => {
+  const handleFormSubmit = (values:LoginFormValues) => {
     const user = localStorage.getItem('email')
     if(values.email === user){
         navigate('/private/home');
@@ -61,8 +65,6 @@ function Login() {
           title="Failed"
           color="teal"
           onClose={() => setSuccess(false)}
-          shadow="sm"
-          position="bottom"
         >
             Invalid Email
         </Notification>
